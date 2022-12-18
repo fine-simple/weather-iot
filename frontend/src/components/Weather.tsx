@@ -39,13 +39,12 @@ export default function Weather() {
     >
       <section className="w-full h-1/3 flex flex-col justify-end items-center pb-10 lg:h-full lg:justify-center backdrop-filter backdrop-brightness-75 backdrop-blur-sm">
         <h1 className="text-3xl">Cairo, Egypt</h1>
-        <h2>
-          {time.toDateString()} at {time.toLocaleTimeString()}
-        </h2>
+        <h2 className="font-semibold">{time.toDateString()}</h2>
+        <h2 className="font-semibold">{time.toLocaleTimeString()}</h2>
         <div className="flex">
           <FaCloudSun size={80} />
           <h1 className="text-5xl font-semibold m-auto ml-2">
-            {weather.temp}ºC
+            {parseFloat(weather.temp.toFixed(2))}ºC
           </h1>
         </div>
       </section>
