@@ -1,8 +1,7 @@
 #include <WiFi.h>
-#include <Wire.h>
 #include <Adafruit_BMP085.h>
-#include <HTTPClient.h>
 #include "ESP32_MailClient.h"
+#include <ArduinoWebsockets.h>
 #include "DHT.h"
 #define DHTTYPE DHT11
 #define DHTPIN 4
@@ -12,23 +11,21 @@
 #define smtpServerPort 465
 #define emailSubject "[ALERT] ESP32 temp"
 
-String API_URL = "http://192.168.73.193:5000/update";
-int lastCode = -1;
-
+// Wifi
+const char* ssid = "Fares";
+const char* password = "nsma2981088";
+// HTTP Client
+websockets::WebsocketsClient client;
 // Default Recipient Email Address
 String reciever_email = "cocomanga@gmail.com";
 String threshold = "25.0";
+
 // Default Threshold temp Value
 bool email_sent = false;
 SMTPData smtd;
-
-
 Adafruit_BMP085 bmp_180;
-const char* ssid = "test";
-const char* password = "1234567890";
-WiFiServer server(80);
-
 DHT dht(DHTPIN, DHTTYPE);
+
 void setup() {
   Serial.begin(9600);
   WiFi.mode(WIFI_STA);
@@ -40,15 +37,15 @@ void setup() {
     Serial.println("Not connected with BMP180 sensor, check connections ");
     while (1) {}
   }
+
   dht.begin();
   Serial.println(WiFi.localIP());
-  server.begin();
+  client.connect("ws://192.168.1.20:3000/ws");
 }
-
-
 
 void loop() {
   float temp = bmp_180.readTemperature();
+
   //Serial.print("Temp = ");
   Serial.print("temp:");
   Serial.print(temp);
@@ -62,7 +59,6 @@ void loop() {
   Serial.print(",");
 
   //Serial.println(" Pa");
-
   float alt = bmp_180.readAltitude();
   alt *= -1;
   //Serial.print("Altitude = ");
@@ -74,7 +70,7 @@ void loop() {
 
   float hum = dht.readHumidity();
   //Serial.print("Humidity = ");
-  Serial.print("huidity:");
+  Serial.print("humidity:");
   Serial.println(hum);
   //Serial.println(" par");
 
@@ -100,27 +96,13 @@ void loop() {
   }
 
   if ((WiFi.status() == WL_CONNECTED)) {
-    HTTPClient http;
 
-    String httpRequestData = ("{\"api_key\":\"tPmAT5Ab3j7F9\", \"temp\": " + std::to_string(temp) + ", \"pressure\": " + std::to_string(pres) + ", \"altitude\": " + std::to_string(alt) + ", \"humidity\": " + std::to_string(hum) + " }").c_str();
-    // set URL
-    http.begin(API_URL);
-    // specify content-type header
-    http.addHeader("Content-Type", "application/json");
-
-    // send the request
-    int httpCode = http.POST(httpRequestData);
-    // check for the returning code
-    if (httpCode != lastCode) {
-      Serial.print("Response Code : ");
-      Serial.println(httpCode);
-      lastCode = httpCode;
-    }
-    // close connection and free resources
-    http.end();
-  } else
-    //.println("WiFi Disconnected");
-  delay(1000);
+    String jsonData = ("{\"api_key\":\"tPmAT5Ab3j7F9\", \"temp\": " + std::to_string(temp) + ", \"pressure\": " + std::to_string(pres) + ", \"altitude\": " + std::to_string(alt) + ", \"humidity\": " + std::to_string(hum) + " }").c_str();
+    client.send(jsonData);
+  } else {
+    Serial.println("WiFi Disconnected");
+    delay(1000);
+  }
 
   Serial.println();
   delay(500);

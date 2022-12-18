@@ -1,27 +1,69 @@
 import express from "express";
-import dotenv from "dotenv";
+import expressWs from "express-ws";
+import path from "path";
 
-dotenv.config();
+const API_KEY = "tPmAT5Ab3j7F9";
 
-const app = express();
+type Weather = {
+  temp: number;
+  humidity: number;
+  pressure: number;
+  altitude: number;
+};
+
+const weather: Weather = {
+  temp: -1,
+  humidity: -1,
+  pressure: -1,
+  altitude: -1,
+};
+
+const data = {
+  weather,
+};
+
+let app = express();
 const port = process.env.PORT || 3000;
 
-const data = { weather: {} };
+const frontEndDir = path.join(__dirname, "/../../frontend/dist");
 
-app.get("/", (req, res) => {
-  res.send("<h1>Working</h1>");
+app.use(express.static(frontEndDir));
+
+app.use(express.json());
+
+const appWs = expressWs(app);
+
+app.get("/", (_, res) => {
+  res.sendFile("index.html");
 });
 
-app.get("/api", (req, res) => {
-  res.send();
+app.get("/api", (_, res) => {
+  res.json(data);
 });
 
-app.post("/api", (req, res) => {
+app.post("/update", (req, res) => {
+  if (req.body.api_key !== "tPmAT5Ab3j7F9") return;
+
   data.weather = req.body;
   console.log(req.body);
   res.sendStatus(200);
 });
 
+appWs.app.ws("/ws", (ws, r) => {
+  console.log(`Connected with ${r.socket.remoteAddress}`);
+  ws.on("message", msg => {
+    const jsonMsg = JSON.parse(msg.toString());
+
+    if (jsonMsg.api_key !== API_KEY) return;
+    delete jsonMsg.api_key;
+    data.weather = jsonMsg;
+  });
+
+  ws.on("close", () => {
+    console.log(`${r.socket.remoteAddress} Connection Closed`);
+  });
+});
+
 app.listen(port, () => {
-  console.log(`⚡️[server]: Server is running at https://localhost:${port}`);
+  console.log(`⚡️[server]: Server is running at http://127.0.0.1:${port}`);
 });

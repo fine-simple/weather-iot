@@ -1,18 +1,37 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useTime from "../hooks/useTime";
-import { FaCloudSun, FaTemperatureLow, FaWater } from "react-icons/fa";
+import { FaCloudSun, FaWater } from "react-icons/fa";
 import { RxHeight } from "react-icons/rx";
 import { BsCloudHaze } from "react-icons/bs";
 import Entry from "./Entry";
 
 export default function Weather() {
   const [weather, setWeather] = useState({
-    tempreture: 20,
-    humidity: 30,
-    pressure: 1,
-    altitude: 30,
+    temp: -1,
+    humidity: -1,
+    pressure: -1,
+    altitude: -1,
   });
+  const [failed, setFailed] = useState(false);
   const time = useTime();
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetch("/api")
+        .then(data => data.json())
+        .then(json => {
+          setWeather(json.weather);
+          setFailed(false);
+        })
+        .catch(() => {
+          setFailed(true);
+        });
+    }, 1000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
 
   return (
     <div
@@ -26,23 +45,42 @@ export default function Weather() {
         <div className="flex">
           <FaCloudSun size={80} />
           <h1 className="text-5xl font-semibold m-auto ml-2">
-            {weather.tempreture}º
+            {weather.temp}ºC
           </h1>
         </div>
       </section>
       <section className="h-full w-full bg-sky-600/20 backdrop-filter backdrop-blur-xl backdrop-brightness-[30%] lg:w-2/4 lg: p-5 pt-10">
-        <h2 className="text-xl font-semibold">Other details</h2>
-        <hr />
-        <div className="text-xl">
-          <Entry title="Humidity" value={weather.humidity} icon={FaWater} />
-          <Entry title="Pressure" value={weather.pressure} icon={BsCloudHaze} />
-          <Entry title="Altitude" value={weather.altitude} icon={RxHeight} />
-        </div>
-        {/* <h2 className="text-xl font-semibold">Next Days</h2>
-        <hr />
-        <div className="text-xl">
-          <Entry title="Tomorrow" value={30} />
-        </div> */}
+        <main className="">
+          <h2 className="text-xl font-semibold">Other details</h2>
+          <hr />
+          <div className="text-xl">
+            <Entry
+              title="Humidity"
+              value={weather.humidity}
+              unit="%"
+              icon={FaWater}
+            />
+            <Entry
+              title="Pressure"
+              value={weather.pressure}
+              unit="pa"
+              icon={BsCloudHaze}
+            />
+            <Entry
+              title="Altitude"
+              value={weather.altitude}
+              unit="m"
+              icon={RxHeight}
+            />
+          </div>
+        </main>
+        <footer className="absolute left-0 w-full bottom-0">
+          {failed && (
+            <p className="text-red-600 text-center">
+              Lost Connection to the server
+            </p>
+          )}
+        </footer>
       </section>
     </div>
   );
