@@ -3,17 +3,21 @@
 #include "ESP32_MailClient.h"
 #include <ArduinoWebsockets.h>
 #include "DHT.h"
+// Pins
 #define DHTTYPE DHT11
 #define DHTPIN 4
+// Email
 #define emailSenderAccount "cocomanga59@gmail.com"
 #define emailSenderPassword "otdzyyapakdabofe"
 #define smtpServer "smtp.gmail.com"
 #define smtpServerPort 465
 #define emailSubject "[ALERT] ESP32 temp"
-
 // Wifi
-const char* ssid = "Fares";
-const char* password = "nsma2981088";
+#define SSID "test"
+#define PASS "1234567890"
+// WebSocket
+#define WS_URI "ws://brovm.francecentral.cloudapp.azure.com:3000/ws"
+
 // HTTP Client
 websockets::WebsocketsClient client;
 // Default Recipient Email Address
@@ -29,7 +33,7 @@ DHT dht(DHTPIN, DHTTYPE);
 void setup() {
   Serial.begin(9600);
   WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
+  WiFi.begin(SSID, PASS);
   if (WiFi.waitForConnectResult() != WL_CONNECTED) {
     Serial.println("WiFi Failed!");
   }
@@ -40,7 +44,7 @@ void setup() {
 
   dht.begin();
   Serial.println(WiFi.localIP());
-  client.connect("ws://192.168.1.20:3000/ws");
+  client.connect(WS_URI);
 }
 
 void loop() {
@@ -59,8 +63,8 @@ void loop() {
   Serial.print(",");
 
   //Serial.println(" Pa");
-  float alt = bmp_180.readAltitude();
-  alt *= -1;
+  float alt = bmp_180.readAltitude() * -1;
+
   //Serial.print("Altitude = ");
   Serial.print("altitude:");
   Serial.print(alt);
