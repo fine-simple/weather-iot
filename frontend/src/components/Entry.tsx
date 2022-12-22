@@ -1,16 +1,20 @@
 import { IconType } from "react-icons";
+import DefaultLoader from "./DefaultLoader";
 
 export default function Entry({
   title,
   value,
   icon: Icon,
   unit,
+  ...props
 }: {
   title: string;
-  value: number;
+  value: number | null;
   icon?: IconType;
   unit?: string;
 }) {
+  if (!value) return <DefaultLoader />;
+
   return (
     <div className="flex p-5">
       <p className="m-auto ml-0">{title}</p>
