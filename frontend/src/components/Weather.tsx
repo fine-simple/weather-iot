@@ -6,6 +6,7 @@ import { BsCloudHaze } from "react-icons/bs";
 import Entry from "./Entry";
 import TempLoader from "./TempLoader";
 import Input from "./Input";
+import axios from "axios";
 
 export default function Weather() {
   const [weather, setWeather] = useState<WeatherData>({
@@ -29,10 +30,10 @@ export default function Weather() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      fetch("/api")
-        .then(data => data.json())
-        .then(json => {
-          setWeather(json.weather);
+      axios
+        .get("/api")
+        .then(res => {
+          setWeather(res.data.weather);
           setFailed(false);
         })
         .catch(() => {
@@ -40,12 +41,25 @@ export default function Weather() {
         });
     }, 1000);
 
-    fetch("/thresholds")
-      .then(data => data.json())
-      .then(json => {
-        setThresholds(json);
+    axios
+      .get("/thresholds")
+      .then(({ data }) => {
+        setThresholds(data);
+      })
+      .catch(() => {
+        setThresholds(old => {
+          const newData = { ...old };
+          Object.keys(old).forEach(k => {
+            old[k as keyof ThresholdsData] = -1;
+          });
+          return newData;
+        });
       });
-    fetch("/email").then(data => console.log(data.body));
+
+    axios
+      .get("/email")
+      .then(({ data }) => setEmail(data))
+      .catch(e => console.log(e));
     return () => {
       clearInterval(interval);
     };
@@ -53,6 +67,18 @@ export default function Weather() {
 
   const submitHandler = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!email) return;
+
+    axios.post("/email", { email }).catch(e => {
+      console.log(e);
+    });
+
+    if (Object.values(thresholds).find(v => !v)) return;
+
+    axios.post("/thresholds", thresholds).catch(e => {
+      console.log(e);
+    });
   };
 
   const thresholdChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {

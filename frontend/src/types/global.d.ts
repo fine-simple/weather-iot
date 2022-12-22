@@ -6,8 +6,8 @@ type WeatherData = {
 };
 
 type ThresholdsData = {
-  temp: "" | number;
-  humidity: "" | number;
-  pressure: "" | number;
-  altitude: "" | number;
+  temp: string | number;
+  humidity: string | number;
+  pressure: string | number;
+  altitude: string | number;
 };
