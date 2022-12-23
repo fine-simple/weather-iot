@@ -24,16 +24,13 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export const sendMail = (
-  weather: Weather,
-  receivers: string | Array<string>
-) => {
-  console.log("sending mail");
+export const sendMail = (emailReceivers, weather: Weather) => {
+  console.log("sending mail to " + emailReceivers);
 
   transporter.sendMail(
     {
       from: "Weather Station ",
-      to: receivers,
+      to: emailReceivers,
       subject: "[Alert] Threshold Reached",
       html: createMessage(weather),
     },
