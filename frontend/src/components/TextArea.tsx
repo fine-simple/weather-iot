@@ -21,7 +21,7 @@ export default function Input({
         onChange={onChange}
         value={value}
         name={name}
-        className="rounded-md bg-slate-400 text-black px-2 w-3/4 lg:w-full"
+        className="rounded-md bg-slate-400 text-black px-2 w-full"
         id={id}
         disabled={disabled || false}
       />
