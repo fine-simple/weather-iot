@@ -20,6 +20,7 @@
 
 // HTTP Client
 websockets::WebsocketsClient client;
+bool socket_connected = false;
 // Default Recipient Email Address
 String reciever_email = "cocomanga@gmail.com";
 String threshold = "25.0";
@@ -44,7 +45,8 @@ void setup() {
 
   dht.begin();
   Serial.println(WiFi.localIP());
-  client.connect(WS_URI);
+  socket_connected = client.connect(WS_URI);
+  Serial.println(socket_connected ? "Connected to server" : "Failed to connect to server");
 }
 
 void loop() {
@@ -100,16 +102,20 @@ void loop() {
   }
 
   if ((WiFi.status() == WL_CONNECTED)) {
-
     String jsonData = ("{\"api_key\":\"tPmAT5Ab3j7F9\", \"temp\": " + std::to_string(temp) + ", \"pressure\": " + std::to_string(pres) + ", \"altitude\": " + std::to_string(alt) + ", \"humidity\": " + std::to_string(hum) + " }").c_str();
-    client.send(jsonData);
+    if (!socket_connected) {
+      Serial.print("Reconnecting with server...");
+      client.connect(WS_URI);
+      delay(500);
+    } else
+      client.send(jsonData);
   } else {
     Serial.println("WiFi Disconnected");
     delay(1000);
   }
 
   Serial.println();
-  delay(500);
+  delay(1000);
 }
 
 bool sendEmailNotification(String emailMessage) {
