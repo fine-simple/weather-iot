@@ -16,7 +16,7 @@
 #define SSID "test"
 #define PASS "1234567890"
 // WebSocket
-#define WS_URI "ws://brovm.francecentral.cloudapp.azure.com:3000/ws"
+#define WS_URI "ws://brovm.francecentral.cloudapp.azure.com/ws"
 
 // HTTP Client
 websockets::WebsocketsClient client;
