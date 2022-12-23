@@ -59,7 +59,7 @@ app.get("/thresholds", (_, res) => {
 app.post("/thresholds", (req, res) => {
   if (!req.body) res.status(406).send("Can't Accept Null Data");
 
-  data.thresholds = req.body;
+  data.thresholds = { ...data.thresholds, ...req.body };
   res.sendStatus(200);
 });
 
