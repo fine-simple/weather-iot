@@ -11,6 +11,7 @@ import TextArea from "./TextArea";
 
 export default function Weather() {
   const [weather, setWeather] = useState<WeatherData>({
+    timestamp: null,
     temp: null,
     humidity: null,
     pressure: null,
@@ -41,6 +42,16 @@ export default function Weather() {
           setFailed(true);
         });
     }, 1000);
+
+    axios
+      .get("/api")
+      .then(res => {
+        setWeather(res.data.weather);
+        setFailed(false);
+      })
+      .catch(() => {
+        setFailed(true);
+      });
 
     axios
       .get("/thresholds")
@@ -175,6 +186,16 @@ export default function Weather() {
                 value="Update"
               />
             </form>
+          </article>
+          <article>
+            <h2 className="text-xl font-semibold">Data</h2>
+            <hr className="mb-6" />
+            <a
+              href="/data"
+              className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+            >
+              Download as csv
+            </a>
           </article>
         </main>
         <footer className="mt-3">

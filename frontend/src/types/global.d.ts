@@ -1,4 +1,5 @@
 type WeatherData = {
+  timestamp: null | number;
   temp: null | number;
   humidity: null | number;
   pressure: null | number;
