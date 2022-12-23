@@ -109,7 +109,7 @@ export default function Weather() {
           <FaCloudSun className="scale-x-[-1]" size={80} />
           {(weather.temp && (
             <h1 className="text-5xl font-semibold m-auto ml-2">
-              {Math.round(weather.temp)}ºC
+              {Math.round(weather.temp)}℃
             </h1>
           )) || <TempLoader />}
         </div>
