@@ -7,6 +7,7 @@ import Entry from "./Entry";
 import TempLoader from "./TempLoader";
 import Input from "./Input";
 import axios from "axios";
+import TextArea from "./TextArea";
 
 export default function Weather() {
   const [weather, setWeather] = useState<WeatherData>({
@@ -70,7 +71,7 @@ export default function Weather() {
 
     if (!email) return;
 
-    axios.post("/email", { email }).catch(e => {
+    axios.post("/email", { email: email.replaceAll("\n", ",") }).catch(e => {
       console.log(e);
     });
 
@@ -132,13 +133,13 @@ export default function Weather() {
             <h2 className="text-xl font-semibold">Options</h2>
             <hr className="mb-6" />
             <form onSubmit={submitHandler} className="text-xl flex flex-col">
-              <Input
+              <TextArea
                 name="email"
                 value={email}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
                   setEmail(e.target.value);
                 }}
-                label="Email Receiver"
+                label="Email Receiver(s)"
               />
               <Input
                 name="temp"
